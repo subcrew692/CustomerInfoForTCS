@@ -1,6 +1,5 @@
 <template>
   <div class="container">
-		<div class="row">
 			<div align="center"><h1>TCS</h1></div>
       <!-- loading area -->
       <div class="loading" :style="{'display':loading, 'cursor':'wait'}">
@@ -14,7 +13,7 @@
         <tbody>
           <tr>
             <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
-              <span style="font-size:25px;cursor:pointer;" @click="modifyEmpArea = !modifyEmpArea">
+              <span style="cursor:pointer;" @click="modifyEmpArea = !modifyEmpArea">
                 <strong>員工異動 
                 <i class="fa fa-chevron-down" v-if="!modifyEmpArea"></i>
                 <i class="fa fa-chevron-up" v-if="modifyEmpArea"></i></strong></span></div>
@@ -24,11 +23,11 @@
             <td style="width:50%">
               <transition name="fade">
                 <div class="panel-heading" style="font-family:consolas;text-align:left;"  v-show="modifyEmpArea">
-                <span style="font-size:18px;">新增
+                <span>新增
                 <input type="radio" name="r" value="1" v-model="addEmpType" />設計師
                 <input type="radio" name="r" value="2" v-model="addEmpType" />助理
                 <input class="form-controll" type="text" placeholder="請輸入名字" v-model="addEmpName" />
-                <div class="btn btn-info" @click="addEmp()"><i class="fa fa-user"></i> 確認新增</div>
+                <div class="btn btn-info btn-sm" @click="addEmp()" :disabled="addEmpBtnDisabled"><i class="fa fa-user"></i> 確認新增</div>
                 </span>
                 </div>
               </transition>
@@ -36,7 +35,7 @@
             <td style="width:50%">
               <transition name="fade">
                 <div class="panel-heading" style="font-family:consolas;text-align:right;"  v-show="modifyEmpArea">
-                  <span style="font-size:18px;">刪除
+                  <span>刪除
                     設計師:<select v-model="delDesignerName">
                       <option value="none">請選擇</option>
                       <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
@@ -45,7 +44,7 @@
                       <option value="none">請選擇</option>
                       <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
                     </select>
-                    <button class="btn btn-danger" @click="deleteEmp()"><i class="fa fa-times"></i> 確認刪除</button>
+                    <button class="btn btn-danger btn-sm" @click="deleteEmp()" :disabled="delEmpBtnDisabled"><i class="fa fa-times"></i> 確認刪除</button>
                   </span>
                 </div>
               </transition>
@@ -54,7 +53,7 @@
         </tbody>
       </table>
       <!-- 顧客消費區域 -->
-      <table border="0" style="text-align:left;width:100%;font-size:20px;">
+      <table border="0" style="text-align:left;width:100%;">
         <tbody>
           <tr>
             <td style="height:50px; width:23%"><i class="far fa-calendar-alt"></i>日期&nbsp;
@@ -73,7 +72,7 @@
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
             </select></td>
-            <td rowspan="2"><div class="btn btn-success" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
+            <td rowspan="2"><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
           </tr>
           <tr>
             <td style="height:50px;">
@@ -88,7 +87,7 @@
 			  </tbody>
 			</table>
       <!-- 顧客消費紀錄 -->
-      <table border="1" style="text-align:center;width:80%;font-size:20px;" align="center">
+      <table border="1" class="table table-striped table-bordered table-hover">
         <tbody>
           <tr>
             <td style="text-align: center;">編號</td>
@@ -100,29 +99,40 @@
             <td style="text-align: center;">刪除紀錄</td>
           </tr>
           <tr v-for="(info, index) in reverseInfo">
-            <td>{{index}}</td>
-            <td>{{info.date}}</td>
-            <td>{{info.totalCost}}</td>
-            <td>{{info.designer}}</td>
-            <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
-            <td>{{info.detail}}</td>
-            <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id)"></i></td>
+            <template v-if="info.mobile === mobile">
+              <td>{{index}}</td>
+              <td>{{info.date}}</td>
+              <td>{{info.totalCost}}</td>
+              <td>{{info.designer}}</td>
+              <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
+              <td>{{info.detail}}</td>
+              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id)"></i></td>
+            </template>
           </tr>
         </tbody>
       </table>
-
-		</div>
     <!-- Message Modal -->
-    <div v-show="messageModal" class="madal">
-      <div class="modal__container">
-        <header class="modal__header">
-          <h2 class="view-title">Info Message</h2>
-        </header>
-        <div class="modal__body">
-          <h3 style="text-align:center;">{{infoMsg}}</h3>
+    <div v-show="messageModal">
+      <transition name="modal">
+        <div class="modal-mask">
+          <div class="modal-wrapper">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" @click="messageModal=false;infoMsg=''">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                  <h2 class="modal-title" style="font-family:consolas">Infomation</h2>
+                </div>
+                <div class="modal-body">
+                  {{infoMsg}}
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-primary btn-sm" @click="messageModal=false;infoMsg=''">確認</button>
+                </div>
+              </div>
+          </div>
         </div>
-        <footer class="modal__footer"></footer>
-      </div>
+      </transition>
     </div>
   </div>
 </template>
@@ -157,7 +167,8 @@ export default {
       cut: '',
       dye: '',
       burn: '',
-      wash: ''
+      wash: '',
+      addEmpBtnDisabled: true
     }
   },
   methods: {
@@ -172,6 +183,8 @@ export default {
         timeStamp: vm.getTime()
       });
       vm.loading = false;
+      vm.messageModal = true; // 顯示訊息
+      vm.infoMsg = '新增成功';
     },
     getTime() {
       const now = new Date();
@@ -212,6 +225,8 @@ export default {
         }
       }
       vm.loading = false;
+      vm.messageModal = true; // 顯示訊息
+      vm.infoMsg = '刪除成功';
     },
     /** 日期調整 */
     changeDay() {
@@ -238,7 +253,8 @@ export default {
       const des = this.workDesignerName;
       const ast = this.workAssistantName;
       if(des === 'none') {
-        alert('Are you kidding me?!');
+        vm.messageModal = true;
+        vm.infoMsg = 'Please choose a designer!';
         return false;
       }
       if(vm.checkValueIsNumber()) {
@@ -274,10 +290,12 @@ export default {
       msg += isNaN(vm.burn) ? '燙 ' : '';
       msg += isNaN(vm.wash) ? '洗 ' : '';
       if(msg.length > 0) {
-        alert(msg + '欄位輸入有誤');
+        vm.messageModal = true;
+        vm.infoMsg = msg + '欄位輸入有誤';
         return false;
       }else if(Number(vm.totalCost) === 0)  {
-        alert('for free?? sober up ok?');
+        vm.messageModal = true;
+        vm.infoMsg = 'Free?!!';
         return false;
       }else {
         return true;
@@ -313,6 +331,9 @@ export default {
     },
     reverseInfo: function() {
       return this.consumeInfo.reverse();
+    },
+    delEmpBtnDisabled: function() {
+      return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? false : true;
     }
   },
   mounted() {
@@ -339,58 +360,36 @@ export default {
     for(var i = 1; i<= 31; i++) {
       vm.allDates.push(i);
     }
+  },
+  watch: {
+    addEmpName: function(val) {
+      this.addEmpBtnDisabled = val !== '' ? false : true;
+    }
   }
 }
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-/* modal */
-.modal {
-  z-index: 3;
-  padding: 50px 0px;
+/** Modal */
+.modal-mask {
   position: fixed;
-  left: 0;
+  z-index: 9998;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
-  animation: opac 0.8s;
-  letter-spacing: 2px;
-  text-align: unset;
+  background-color: rgba(0, 0, 0, .5);
+  display: table;
+  transition: opacity .3s ease;
 }
-.modal__container {
-  margin: auto;
-  position: relative;
-  padding: 10px;
-  outline: 0;
-  max-width: 300px;
+.modal-wrapper {
+  display: table-cell;
+  vertical-align: middle;
 }
-.modal__header {
-  color: #fff;
-  background-color: #2B364B;
-  padding: 10px;
-  text-align: center;
-  border-radius: 5px 5px 0px 0px;
-}
-.modal__body {
-  background-color: #fff;
-  padding: 20px 50px;
-  text-align: center;
-}
-.modal__body p {
-  text-align: left;
-  line-height: 24px;
-}
-.modal__img {
-  max-width: 100%;
-}
-.modal__footer {
-  color: #fff;
-  background-color: #2B364B;
-  height: 8px;
-  border-radius: 0px 0px 5px 5px;
+.modal-content {
+  width:50%;
+  margin: 0px auto;
 }
 /**  loading */
 .loading {
@@ -438,6 +437,7 @@ export default {
     -webkit-transform: scale(1.0);
   }
 }
+
 .fade-enter-active, 
 .fade-leave-active {
   transition: opacity .8s;
@@ -445,5 +445,8 @@ export default {
 .fade-enter, 
 .fade-leave-to {
   opacity: 0;
+}
+.table_record {
+  padding: 10px;
 }
 </style>
