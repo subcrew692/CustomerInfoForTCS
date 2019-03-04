@@ -13,7 +13,7 @@
         <button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button>
       </div>
 
-			<div align="center"><h1>TCS</h1></div>
+	    <div align="center"><h1>TCS</h1></div>
 
       <!-- loading area -->
       <div class="loading" :style="{'display':loading, 'cursor':'wait'}">
@@ -46,9 +46,11 @@
                 </div>
               </transition>
             </td>
+          </tr>
+          <tr>
             <td style="width:50%">
               <transition name="fade">
-                <div class="panel-heading" style="font-family:consolas;text-align:right;"  v-show="modifyEmpArea">
+                <div class="panel-heading" style="font-family:consolas;text-align:left;"  v-show="modifyEmpArea">
                   <span>刪除
                     設計師:<select v-model="delDesignerName">
                       <option value="none">請選擇</option>
@@ -75,7 +77,11 @@
               <select v-model="designMonth" @change="changeDay()"><option v-for="month in allMonths">{{month}}</option></select>/
               <select v-model="designDate"><option v-for="date in allDates">{{date}}</option></select>
             </td>
+          </tr>
+          <tr>
             <td style="width:23%;"><i class="fa fa-dollar"></i>總金額:&nbsp;&nbsp;{{totalCost}}</td>
+          </tr>
+          <tr>
             <td style="width:23%;"><i class="fa fa-scissors"></i>設計師&nbsp;&nbsp;
             <select v-model="workDesignerName">
               <option value="none">請選擇</option>
@@ -90,16 +96,18 @@
           </tr>
           <tr>
             <td style="height:50px;">
-            剪&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="cut"/></td>
+            剪&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="cut"/></td>
             <td style="height:50px;">
-            染&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="dye"/></td>
+            染&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="dye"/></td>
+          </tr>
+          <tr>
             <td style="height:50px;">
-            燙&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="burn"/></td>
+            燙&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="burn"/></td>
             <td style="height:50px;">
-            洗&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="wash"/></td>
-					</tr>
-			  </tbody>
-			</table>
+            洗&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="wash"/></td>
+		  </tr>
+		</tbody>
+	    </table>
       <!-- 顧客消費紀錄 -->
       <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== 'boss'">
         <tbody>
