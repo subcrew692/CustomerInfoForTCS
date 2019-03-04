@@ -2,8 +2,8 @@
   <div class="container">
       <!-- blockModal Area -->
       <div class="icard-list" v-show="confirmLogIn">
-        <p class="closeWisdom" v-show="mobile !== 'boss'">會員：{{mobile}}</p>
-        <p class="closeWisdom" v-show="mobile === 'boss'">老闆您好!</p>
+        <p class="closeWisdom" v-show="mobile !== bossMobile">會員：{{mobile}}</p>
+        <p class="closeWisdom" v-show="mobile === bossMobile">老闆您好!</p>
         <transition name="fade">
           <h4 class="closeWisdom" v-show="blockModal">{{blockModalMsg}}</h4>
         </transition>
@@ -101,7 +101,7 @@
 			  </tbody>
 			</table>
       <!-- 顧客消費紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== 'boss'">
+      <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== bossMobile">
         <tbody>
           <tr>
             <td style="text-align: center;">設計日期</td>
@@ -124,7 +124,7 @@
         </tbody>
       </table>
       <!-- 老闆瀏覽所有紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === 'boss' && confirmLogIn">
+      <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === bossMobile && confirmLogIn">
         <tbody>
           <tr>
             <td style="text-align: center;">會員電話 
@@ -201,6 +201,7 @@
 <script>
 const empRef = firebase.database().ref('/employees/');
 const customerRef = firebase.database().ref('/customers/');
+const bossRef = firebase.database().ref('/boss/');
 export default {
   name: 'HelloWorld',
   data () {
@@ -239,7 +240,8 @@ export default {
       sortByDate: true, // 預設以日期排序
       sortFromBigToSmall: true, // 預設排序由大到小
       blockModal: false,
-      blockModalMsg: ''
+      blockModalMsg: '',
+      bossMobile: ''
     }
   },
   methods: {
@@ -511,6 +513,11 @@ export default {
         ? Object.keys(val).map(key => ({ id: key, ...val[key] }))
         : null
       vm.consumeInfo = costInfo;
+    });
+    bossRef.on('value', function(snapshot) {
+      const val = snapshot.val();
+      console.log(val);
+      vm.bossMobile = val;
     });
     // init year, month, date
     const now = new Date();
