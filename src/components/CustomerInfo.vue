@@ -1,5 +1,9 @@
 <template>
   <div class="container">
+      <div align="right">
+        <span v-show="confirmLogIn">目前會員電話：{{mobile}}</span>
+        <button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button>
+      </div>
 			<div align="center"><h1>TCS</h1></div>
       <!-- loading area -->
       <div class="loading" :style="{'display':loading, 'cursor':'wait'}">
@@ -14,7 +18,7 @@
           <tr>
             <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
               <span style="cursor:pointer;" @click="modifyEmpArea = !modifyEmpArea">
-                <strong>員工異動 
+                <strong><i class="fa fa-user"></i> 員工異動 
                 <i class="fa fa-chevron-down" v-if="!modifyEmpArea"></i>
                 <i class="fa fa-chevron-up" v-if="modifyEmpArea"></i></strong></span></div>
             </td>
@@ -67,7 +71,7 @@
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
             </select></td>
-            <td style="width:23%;"><i class="fa fa-bars"></i>助理&nbsp;&nbsp;
+            <td style="width:23%;"><i class="fa fa-book"></i>助理&nbsp;&nbsp;
             <select v-model="workAssistantName">
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
@@ -87,10 +91,9 @@
 			  </tbody>
 			</table>
       <!-- 顧客消費紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover">
+      <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== 'boss'">
         <tbody>
           <tr>
-            <td style="text-align: center;">編號</td>
             <td style="text-align: center;">設計日期</td>
             <td style="text-align: center;">消費金額</td>
             <td style="text-align: center;">設計師</td>
@@ -100,40 +103,88 @@
           </tr>
           <tr v-for="(info, index) in reverseInfo">
             <template v-if="info.mobile === mobile">
-              <td>{{index}}</td>
               <td>{{info.date}}</td>
               <td>{{info.totalCost}}</td>
               <td>{{info.designer}}</td>
               <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
               <td>{{info.detail}}</td>
-              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id)"></i></td>
+              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
             </template>
           </tr>
         </tbody>
       </table>
-    <!-- Message Modal -->
-    <div v-show="messageModal">
-      <transition name="modal">
-        <div class="modal-mask">
-          <div class="modal-wrapper">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <button type="button" class="close" @click="messageModal=false;infoMsg=''">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                  <h2 class="modal-title" style="font-family:consolas">Infomation</h2>
+      <!-- 老闆瀏覽所有紀錄 -->
+      <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === 'boss' && confirmLogIn">
+        <tbody>
+          <tr>
+            <td style="text-align: center;">會員電話 
+            <i class="fa fa-sort" @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
+            <td style="text-align: center;">設計日期 
+            <i class="fa fa-sort" @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
+            <td style="text-align: center;">消費金額</td>
+            <td style="text-align: center;">設計師</td>
+            <td style="text-align: center;">助理</td>
+            <td style="text-align: center;">設計內容</td>
+            <td style="text-align: center;">刪除紀錄</td>
+          </tr>
+          <tr v-for="(info, index) in reverseInfo">
+            <template>
+              <td>{{info.mobile}}</td>
+              <td>{{info.date}}</td>
+              <td>{{info.totalCost}}</td>
+              <td>{{info.designer}}</td>
+              <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
+              <td>{{info.detail}}</td>
+              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
+            </template>
+          </tr>
+        </tbody>
+      </table>
+      <!-- Message Modal -->
+      <div v-show="messageModal">
+        <transition name="modal">
+          <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-content" style="width:30%;">
+                  <div class="modal-header">
+                    <button type="button" class="close" @click="resetModal()">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h2 class="modal-title" style="font-family:consolas">Infomation</h2>
+                  </div>
+                  <div class="modal-body">
+                    {{infoMsg}}
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-default btn-sm" v-show="commonCancel" @click="resetModal()">取消</button>
+                    <button class="btn btn-primary btn-sm" v-show="commonCheck" @click="resetModal()">確認</button>
+                    <button class="btn btn-primary btn-sm" v-show="delRecordBtn" @click="delRecord(delRecordID,null,null)">確認刪除</button>
+                  </div>
                 </div>
-                <div class="modal-body">
-                  {{infoMsg}}
-                </div>
-                <div class="modal-footer">
-                  <button class="btn btn-primary btn-sm" @click="messageModal=false;infoMsg=''">確認</button>
-                </div>
-              </div>
+            </div>
           </div>
-        </div>
-      </transition>
-    </div>
+        </transition>
+      </div>
+      <!-- Log in -->
+      <div v-show="loginModal">
+        <transition name="modal">
+          <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-content" style="width:30%;">
+                  <div class="modal-header">
+                    <h2 class="modal-title" style="font-family:consolas">Log in</h2>
+                  </div>
+                  <div class="modal-body">
+                    <input type="text" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-primary btn-sm" @click="login()" :disabled="mobile===''">登入</button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </transition>
+      </div>
   </div>
 </template>
 
@@ -144,22 +195,24 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      mobile: '0987808488',
+      mobile: '',
+      loginModal: true, // 登入畫面
+      confirmLogIn: false, // 確認登入後再show消費紀錄
       loading: 'none', // loading畫面
       addEmpType: '1', // 預設新增員工職業
       addEmpName: '', // 新增員工姓名
       empObjList: [], // 員工資訊
       consumeInfo: [], //顧客消費資訊
-      delDesignerName: 'none', // 刪除設計師
-      delAssistantName: 'none',// 刪除助理
+      delDesignerName: 'none',  // 刪除設計師
+      delAssistantName: 'none', // 刪除助理
       workDesignerName: 'none',
       workAssistantName: 'none',
-      messageModal: false,
-      infoMsg: '',
+      messageModal: false, // 開啟modal
+      infoMsg: '', // modal訊息
       modifyEmpArea: false, // 員工異動區域
-      designYear: new Date().getFullYear(),
-      designMonth: new Date().getMonth()+1,
-      designDate: new Date().getDate(),
+      designYear: new Date().getFullYear(), // 預設年
+      designMonth: new Date().getMonth()+1, // 預設月
+      designDate: new Date().getDate(), // 預設日
       allYears: [],
       allMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
       monthDates: [31,28,31,30,31,30,31,31,30,31,30,31],
@@ -168,7 +221,13 @@ export default {
       dye: '',
       burn: '',
       wash: '',
-      addEmpBtnDisabled: true
+      addEmpBtnDisabled: true, // 新增員工按鍵鎖定
+      commonCancel: false, // modal取消button
+      commonCheck: false, // modal確認button
+      delRecordBtn: false, // modal刪除紀錄button
+      delRecordID: '', // 刪除紀錄的ID
+      sortByDate: true, // 預設以日期排序
+      sortFromBigToSmall: true // 預設排序由大到小
     }
   },
   methods: {
@@ -302,13 +361,76 @@ export default {
       }
     },
     /** 刪除紀錄 */
-    delRecord(id) {
+    delRecord(id, dat, money) {
       const vm = this;
       vm.loading = true;
       console.log(id);
-      const delRef = firebase.database().ref('/customers/' + id);
-      delRef.set({});
-      vm.loading = false;
+      if(vm.delRecordBtn === false) {
+        vm.delRecordID = id;
+        vm.callModal(2, '刪除資料：' + dat + '，消費金額：$' + money);
+      }else {
+        const delRef = firebase.database().ref('/customers/' + id);
+        delRef.set({});
+        vm.loading = false;
+        vm.callModal(1, '資料已刪除');
+        vm.delRecordID = '';
+      }
+    },
+    /** 呼叫Modal */
+    callModal(type, msg) {
+      const vm = this;
+      vm.resetModal(); // 先重置Modal
+      vm.messageModal = true;
+      vm.infoMsg = '';
+      if(type === 1) { // 一般訊息
+        vm.commonCancel = true;
+        vm.commonCheck = true;
+        vm.infoMsg = msg;
+      }else if(type === 2) { // 刪除紀錄
+        vm.commonCancel = true;
+        vm.infoMsg = msg;
+        vm.delRecordBtn = true;
+      }
+    },
+    resetModal() {
+      const vm = this;
+      vm.messageModal = false;
+      vm.loginModal = false;
+      vm.infoMsg = '';
+      // 關閉所有button
+      vm.commonCancel = false;
+      vm.commonCheck = false;
+      vm.delRecordBtn = false;
+    },
+    login() {
+      this.resetModal();
+      this.confirmLogIn = true;
+    },
+    /** 切換會員 */
+    changeMember() {
+      const vm = this;
+      vm.mobile='';
+      vm.loginModal=true;
+      vm.confirmLogIn=false;
+      vm.resetAllInput();
+    },
+    /** 重置所有 */
+    resetAllInput() {
+      const vm = this;
+      vm.cut = '';
+      vm.dye = '';
+      vm.burn = '';
+      vm.wash = '';
+      vm.workDesignerName = 'none';
+      vm.workAssistantName = 'none';
+      vm.designYear = new Date().getFullYear(); // 預設年
+      vm.designMonth = new Date().getMonth()+1; // 預設月
+      vm.designDate = new Date().getDate(); // 預設日
+      vm.addEmpName = '';
+      vm.addEmpType = '1';
+      vm.modifyEmpArea = false;
+      vm.delDesignerName = 'none';
+      vm.delAssistantName = 'none';
     }
   },
   computed: {
@@ -330,7 +452,28 @@ export default {
       return cost;
     },
     reverseInfo: function() {
-      return this.consumeInfo.reverse();
+      const vm = this;
+      var sortInfo = vm.consumeInfo;
+      if(sortInfo !== null && sortInfo.length > 0) {
+        sortInfo.sort(function(a, b) {
+          if(vm.sortByDate) {
+            if(vm.sortFromBigToSmall) {
+              // 由大到小
+              return new Date(b.date) - new Date(a.date);
+            }else {
+              // 由小到大
+              return new Date(a.date) - new Date(b.date);
+            }
+          }else {
+            if(vm.sortFromBigToSmall) {
+              return b.mobile - a.mobile;
+            }else {
+              return a.mobile - b.mobile;
+            }
+          }
+        });
+      }
+      return sortInfo;
     },
     delEmpBtnDisabled: function() {
       return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? false : true;
@@ -364,6 +507,13 @@ export default {
   watch: {
     addEmpName: function(val) {
       this.addEmpBtnDisabled = val !== '' ? false : true;
+    }
+  },
+  directives: {
+    focus: {
+      update: function (el) {
+        el.focus();
+      }
     }
   }
 }
