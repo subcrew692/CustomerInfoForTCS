@@ -265,13 +265,13 @@ export default {
     addEmp() {
       const vm = this;
       console.log({'emp name':vm.addEmpName});
-      vm.loading = true;
+      vm.loading = 'block';
       empRef.push({
         empName: vm.addEmpName,
         empType: vm.addEmpType,
         timeStamp: vm.getTime()
       });
-      vm.loading = false;
+      vm.loading = 'none';
       vm.setBlockModal('新增成功');
     },
     getTime() {
@@ -288,7 +288,7 @@ export default {
       if(vm.delDesignerName !== 'none') {
         for(var i = 0; i < vm.empObjList.length; i++) {
           if(vm.empObjList[i].empName === vm.delDesignerName) {
-            vm.loading = true;
+            vm.loading = 'block';
             var id = vm.empObjList[i].id;
             const delRef = firebase.database().ref('/employees/' + id);
             delRef.set({});
@@ -303,7 +303,7 @@ export default {
       if(vm.delAssistantName !== 'none') {
         for(var i = 0; i < vm.empObjList.length; i++) {
           if(vm.empObjList[i].empName === vm.delAssistantName) {
-            vm.loading = true;
+            vm.loading = 'block';
             var id = vm.empObjList[i].id;
             const delRef = firebase.database().ref('/employees/' + id);
             delRef.set({});
@@ -312,7 +312,7 @@ export default {
           }
         }
       }
-      vm.loading = false;
+      vm.loading = 'none';
       vm.setBlockModal('刪除成功');
     },
     /** 日期調整 */
@@ -344,7 +344,7 @@ export default {
         return false;
       }
       if(vm.checkValueIsNumber()) {
-        vm.loading = true;
+        vm.loading = 'block';
         var date = vm.designYear + '/' + vm.designMonth + '/' + vm.designDate;
         var cut = vm.cut > 0 ? '剪: ' + vm.cut : '';
         var dye = vm.dye > 0 ? '染: ' + vm.dye : '';
@@ -364,7 +364,7 @@ export default {
           wash: wash,
           detail: detail
         });
-        vm.loading = false;
+        vm.loading = 'none';
         vm.setBlockModal('紀錄新增成功');
       }
     },
@@ -389,7 +389,7 @@ export default {
     /** 刪除紀錄 */
     delRecord(id, dat, money) {
       const vm = this;
-      vm.loading = true;
+      vm.loading = 'block';
       console.log(id);
       if(vm.delRecordBtn === false) {
         vm.delRecordID = id;
@@ -397,7 +397,7 @@ export default {
       }else {
         const delRef = firebase.database().ref('/customers/' + id);
         delRef.set({});
-        vm.loading = false;
+        vm.loading = 'none';
         vm.resetModal(); // 關閉message modal
         vm.setBlockModal('紀錄刪除成功');
         vm.delRecordID = '';
@@ -504,6 +504,17 @@ export default {
     },
     delEmpBtnDisabled: function() {
       return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? false : true;
+    }
+  },
+  beforeMount() {
+    this.loading = 'block';
+    console.log('beforeMount');
+  },
+  updated() {
+    if(this.empObjList.length > 0 && this.bossMobile !== '') {
+      this.loading = 'none';
+    }else {
+      this.loading = 'block';
     }
   },
   mounted() {
