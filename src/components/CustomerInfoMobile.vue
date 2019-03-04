@@ -72,7 +72,7 @@
       <table border="0" style="text-align:left;width:100%;">
         <tbody>
           <tr>
-            <td style="height:50px; width:23%"><i class="far fa-calendar-alt"></i>日期&nbsp;
+            <td style="height:50px; width:23%" colspan="2"><i class="far fa-calendar-alt"></i>日期&nbsp;
               <select v-model="designYear" @change="changeDay()"><option v-for="year in allYears">{{year}}</option></select>/
               <select v-model="designMonth" @change="changeDay()"><option v-for="month in allMonths">{{month}}</option></select>/
               <select v-model="designDate"><option v-for="date in allDates">{{date}}</option></select>
@@ -80,6 +80,7 @@
           </tr>
           <tr>
             <td style="width:23%;"><i class="fa fa-dollar"></i>總金額:&nbsp;&nbsp;{{totalCost}}</td>
+            <td><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
           </tr>
           <tr>
             <td style="width:23%;"><i class="fa fa-scissors"></i>設計師&nbsp;&nbsp;
@@ -92,7 +93,6 @@
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
             </select></td>
-            <td rowspan="2"><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
           </tr>
           <tr>
             <td style="height:50px;">
@@ -163,7 +163,7 @@
         <transition name="modal">
           <div class="modal-mask">
             <div class="modal-wrapper">
-                <div class="modal-content" style="width:30%;">
+                <div class="modal-content">
                   <div class="modal-header">
                     <button type="button" class="close" @click="resetModal()">
                       <span aria-hidden="true">&times;</span>
