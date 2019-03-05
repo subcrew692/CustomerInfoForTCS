@@ -192,7 +192,7 @@
                   <div class="modal-header">
                     <h2 class="modal-title" style="font-family:consolas">Log in</h2>
                   </div>
-                  <div class="modal-body col-xs-8">
+                  <div class="modal-body col-xs-4">
                     <input type="tel" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
                   </div>
                   <div class="modal-footer">
