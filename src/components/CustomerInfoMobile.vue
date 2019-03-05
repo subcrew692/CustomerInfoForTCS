@@ -23,7 +23,7 @@
         </div>
       </div>
       <!-- Employee Modify Area -->
-      <table class="col-xs-12" style="width:100%;">
+      <table class="col-xs-12">
         <tbody>
           <tr>
             <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
@@ -109,7 +109,7 @@
 		</tbody>
 	    </table>
       <!-- 顧客消費紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== bossMobile">
+      <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="confirmLogIn && mobile !== bossMobile">
         <tbody>
           <tr>
             <td style="text-align: center;">設計日期</td>
@@ -132,7 +132,7 @@
         </tbody>
       </table>
       <!-- 老闆瀏覽所有紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === bossMobile && confirmLogIn">
+      <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="mobile === bossMobile && confirmLogIn">
         <tbody>
           <tr>
             <td style="text-align: center;"><span  @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
@@ -159,7 +159,7 @@
         </tbody>
       </table>
       <!-- Message Modal -->
-      <div v-show="messageModal" class="col-xs-12">
+      <div v-show="messageModal">
         <transition name="modal">
           <div class="modal-mask">
             <div class="modal-wrapper">
