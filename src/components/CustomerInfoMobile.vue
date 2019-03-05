@@ -34,7 +34,7 @@
             </td>
           </tr>
           <tr>
-            <td style="width:50%">
+            <td>
               <transition name="fade">
                 <div class="panel-heading" style="font-family:consolas;text-align:left;"  v-show="modifyEmpArea">
                 <span>新增
@@ -48,7 +48,7 @@
             </td>
           </tr>
           <tr>
-            <td style="width:50%">
+            <td>
               <transition name="fade">
                 <div class="panel-heading" style="font-family:consolas;text-align:left;"  v-show="modifyEmpArea">
                   <span>刪除
@@ -159,7 +159,7 @@
         </tbody>
       </table>
       <!-- Message Modal -->
-      <div v-show="messageModal">
+      <div v-show="messageModal" class="col-xs-12">
         <transition name="modal">
           <div class="modal-mask">
             <div class="modal-wrapper">
@@ -184,7 +184,7 @@
         </transition>
       </div>
       <!-- Log in -->
-      <div v-show="loginModal">
+      <div v-show="loginModal" class="col-xs-12">
         <transition name="modal">
           <div class="modal-mask">
             <div class="modal-wrapper">
@@ -192,7 +192,7 @@
                   <div class="modal-header">
                     <h2 class="modal-title" style="font-family:consolas">Log in</h2>
                   </div>
-                  <div class="modal-body">
+                  <div class="modal-body col-xs-8">
                     <input type="tel" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
                   </div>
                   <div class="modal-footer">
