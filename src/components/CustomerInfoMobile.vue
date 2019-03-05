@@ -193,7 +193,7 @@
                     <h2 class="modal-title" style="font-family:consolas">Log in</h2>
                   </div>
                   <div class="modal-body">
-                    <input size="10" type="tel" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
+                    <input size="14" type="tel" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
                   </div>
                   <div class="modal-footer">
                     <button class="btn btn-primary btn-sm" @click="login()" :disabled="mobile===''">登入</button>
