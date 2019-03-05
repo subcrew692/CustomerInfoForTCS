@@ -9,7 +9,7 @@
         </transition>
       </div>
       <!-- change member area -->
-      <div align="right">
+      <div align="left">
         <button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button>
       </div>
 
@@ -23,7 +23,7 @@
         </div>
       </div>
       <!-- Employee Modify Area -->
-      <table style="width:100%;">
+      <table class="col-xs-12" style="width:100%;">
         <tbody>
           <tr>
             <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
@@ -69,7 +69,7 @@
         </tbody>
       </table>
       <!-- 顧客消費區域 -->
-      <table border="0" style="text-align:left;width:100%;">
+      <table class="col-xs-12" border="0" style="text-align:left;">
         <tbody>
           <tr>
             <td style="height:50px; width:23%" colspan="2"><i class="far fa-calendar-alt"></i>日期&nbsp;
@@ -135,10 +135,10 @@
       <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === bossMobile && confirmLogIn">
         <tbody>
           <tr>
-            <td style="text-align: center;">會員電話 
-            <i class="fa fa-sort" @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
-            <td style="text-align: center;">設計日期 
-            <i class="fa fa-sort" @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
+            <td style="text-align: center;"><span  @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+            會員電話 <i class="fa fa-sort"></i></span></td>
+            <td style="text-align: center;"><span @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+            日期 <i class="fa fa-sort"></i></span></td>
             <td style="text-align: center;">消費金額</td>
             <td style="text-align: center;">設計師</td>
             <td style="text-align: center;">助理</td>
