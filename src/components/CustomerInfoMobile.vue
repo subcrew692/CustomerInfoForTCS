@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container col-xs-12">
       <!-- blockModal Area -->
       <div class="icard-list" v-show="confirmLogIn">
         <p class="closeWisdom" v-show="mobile !== bossMobile">會員：{{mobile}}</p>
