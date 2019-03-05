@@ -184,11 +184,11 @@
         </transition>
       </div>
       <!-- Log in -->
-      <div v-show="loginModal" class="col-xs-12">
+      <div v-show="loginModal">
         <transition name="modal">
           <div class="modal-mask">
             <div class="modal-wrapper">
-                <div class="modal-content">
+                <div class="modal-content col-xs-12">
                   <div class="modal-header">
                     <h2 class="modal-title" style="font-family:consolas">Log in</h2>
                   </div>
