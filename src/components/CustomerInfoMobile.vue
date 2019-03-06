@@ -9,9 +9,15 @@
         </transition>
       </div>
       <!-- change member area -->
-      <div align="left">
-        <button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button>
+      <div class="col-xs-12">
+        <table width="100%">
+          <tr>
+            <td style="width:50%;text-align:left"><button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button></td>
+            <td style="width:50%;text-align:right">{{today | dateFormat}}</td>
+          </tr>
+        </table>
       </div>
+      
 
 	    <div align="center"><h1>TCS</h1></div>
 
@@ -213,6 +219,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+var timer;
 const empRef = firebase.database().ref('/employees/');
 const customerRef = firebase.database().ref('/customers/');
 const bossRef = firebase.database().ref('/boss/');
@@ -255,16 +263,22 @@ export default {
       sortFromBigToSmall: true, // 預設排序由大到小
       blockModal: false,
       blockModalMsg: '',
-      bossMobile: ''
+      bossMobile: '',
+      today: new Date()
     }
   },
   methods: {
     setBlockModal(msg) {
+      const vm = this;
       this.blockModal = true;
       this.blockModalMsg = msg;
-      // Add bind(this) to your setTimeout callback function
+      /**因為function() {}這裡的獨立作用域指向全局(也就是window)
+       * 而window裡沒有blockModal這個變數，所以必須先使用const vm = this;
+       * 然後在setTimeout裡使用vm.blockModal
+       */
       setTimeout(function() {
         this.blockModal = false;
+        // 若不用vm.blockModal，可以用.bind(this)告訴程式是針對這個Vue
       }.bind(this), 3000);
     },
     /** 新增員工 */
@@ -552,6 +566,9 @@ export default {
     for(var i = 1; i<= 31; i++) {
       vm.allDates.push(i);
     }
+    timer = setInterval(() => {
+      vm.today = new Date();
+    }, 1000);
   },
   watch: {
     addEmpName: function(val) {
@@ -564,6 +581,14 @@ export default {
         el.focus();
       }
     }
+  },
+  filters: {
+    dateFormat: function(el) {
+      return moment(el).format("HH:mm:ss");
+    }
+  },
+  beforeDestroy() {
+    clearInterval(timer);
   }
 }
 </script>
