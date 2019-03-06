@@ -41,7 +41,7 @@
                 <input type="radio" name="r" value="1" v-model="addEmpType" />設計師
                 <input type="radio" name="r" value="2" v-model="addEmpType" />助理
                 <input class="form-controll" type="text" placeholder="請輸入名字" v-model="addEmpName" />
-                <div class="btn btn-info btn-sm" @click="addEmp()" :disabled="addEmpBtnDisabled"><i class="fa fa-user"></i> 確認新增</div>
+                <div class="btn btn-info btn-sm" @click="addEmp()" v-show="addEmpBtn"><i class="fa fa-user"></i> 確認新增</div>
                 </span>
                 </div>
               </transition>
@@ -60,7 +60,7 @@
                       <option value="none">請選擇</option>
                       <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
                     </select>
-                    <button class="btn btn-danger btn-sm" @click="deleteEmp()" :disabled="delEmpBtnDisabled"><i class="fa fa-times"></i> 確認刪除</button>
+                    <button class="btn btn-danger btn-sm" @click="deleteEmp()" v-show="delEmpBtn"><i class="fa fa-times"></i> 確認刪除</button>
                   </span>
                 </div>
               </transition>
@@ -69,95 +69,101 @@
         </tbody>
       </table>
       <!-- 顧客消費區域 -->
-      <table class="col-xs-12" border="0" style="text-align:left;">
-        <tbody>
-          <tr>
-            <td style="height:50px; width:23%" colspan="2"><i class="far fa-calendar-alt"></i>日期&nbsp;
-              <select v-model="designYear" @change="changeDay()"><option v-for="year in allYears">{{year}}</option></select>/
-              <select v-model="designMonth" @change="changeDay()"><option v-for="month in allMonths">{{month}}</option></select>/
-              <select v-model="designDate"><option v-for="date in allDates">{{date}}</option></select>
-            </td>
-          </tr>
-          <tr>
-            <td style="width:23%;"><i class="fa fa-dollar"></i>總金額:&nbsp;&nbsp;{{totalCost}}</td>
-            <td><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
-          </tr>
-          <tr>
-            <td style="width:23%;"><i class="fa fa-scissors"></i>設計師&nbsp;&nbsp;
-            <select v-model="workDesignerName">
-              <option value="none">請選擇</option>
-              <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
-            </select></td>
-            <td style="width:23%;"><i class="fa fa-book"></i>助理&nbsp;&nbsp;
-            <select v-model="workAssistantName">
-              <option value="none">請選擇</option>
-              <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
-            </select></td>
-          </tr>
-          <tr>
-            <td style="height:50px;">
-            剪&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="cut"/></td>
-            <td style="height:50px;">
-            染&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="dye"/></td>
-          </tr>
-          <tr>
-            <td style="height:50px;">
-            燙&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="burn"/></td>
-            <td style="height:50px;">
-            洗&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="wash"/></td>
-		  </tr>
-		</tbody>
-	    </table>
+      <div class="col-xs-12">
+        <table border="0" style="text-align:left;">
+          <tbody>
+            <tr>
+              <td style="height:50px; width:23%" colspan="2"><i class="far fa-calendar-alt"></i>日期&nbsp;
+                <select v-model="designYear" @change="changeDay()"><option v-for="year in allYears">{{year}}</option></select>/
+                <select v-model="designMonth" @change="changeDay()"><option v-for="month in allMonths">{{month}}</option></select>/
+                <select v-model="designDate"><option v-for="date in allDates">{{date}}</option></select>
+              </td>
+            </tr>
+            <tr>
+              <td style="width:23%;"><i class="fa fa-dollar"></i>總金額:&nbsp;&nbsp;{{totalCost}}</td>
+              <td><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
+            </tr>
+            <tr>
+              <td style="width:23%;"><i class="fa fa-scissors"></i>設計師&nbsp;&nbsp;
+              <select v-model="workDesignerName">
+                <option value="none">請選擇</option>
+                <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
+              </select></td>
+              <td style="width:23%;"><i class="fa fa-book"></i>助理&nbsp;&nbsp;
+              <select v-model="workAssistantName">
+                <option value="none">請選擇</option>
+                <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
+              </select></td>
+            </tr>
+            <tr>
+              <td style="height:50px;">
+              剪&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="cut"/></td>
+              <td style="height:50px;">
+              染&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="dye"/></td>
+            </tr>
+            <tr>
+              <td style="height:50px;">
+              燙&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="burn"/></td>
+              <td style="height:50px;">
+              洗&nbsp;&nbsp;<input type="tel" style="width:75px;" v-model.number="wash"/></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <!-- 顧客消費紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="confirmLogIn && mobile !== bossMobile">
-        <tbody>
-          <tr>
-            <td style="text-align: center;">設計日期</td>
-            <td style="text-align: center;">消費金額</td>
-            <td style="text-align: center;">設計師</td>
-            <td style="text-align: center;">助理</td>
-            <td style="text-align: center;">設計內容</td>
-            <td style="text-align: center;">刪除紀錄</td>
-          </tr>
-          <tr v-for="(info, index) in reverseInfo">
-            <template v-if="info.mobile === mobile">
-              <td>{{info.date}}</td>
-              <td>{{info.totalCost}}</td>
-              <td>{{info.designer}}</td>
-              <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
-              <td>{{info.detail}}</td>
-              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
-            </template>
-          </tr>
-        </tbody>
-      </table>
+      <div class="col-xs-12">
+        <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="confirmLogIn && mobile !== bossMobile">
+          <tbody>
+            <tr>
+              <td style="text-align: center;">設計日期</td>
+              <td style="text-align: center;">消費金額</td>
+              <td style="text-align: center;">設計師</td>
+              <td style="text-align: center;">助理</td>
+              <td style="text-align: center;">設計內容</td>
+              <td style="text-align: center;">刪除紀錄</td>
+            </tr>
+            <tr v-for="(info, index) in reverseInfo">
+              <template v-if="info.mobile === mobile">
+                <td>{{info.date}}</td>
+                <td>{{info.totalCost}}</td>
+                <td>{{info.designer}}</td>
+                <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
+                <td>{{info.detail}}</td>
+                <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <!-- 老闆瀏覽所有紀錄 -->
-      <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="mobile === bossMobile && confirmLogIn">
-        <tbody>
-          <tr>
-            <td style="text-align: center;"><span  @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
-            會員電話 <i class="fa fa-sort"></i></span></td>
-            <td style="text-align: center;"><span @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
-            日期 <i class="fa fa-sort"></i></span></td>
-            <td style="text-align: center;">消費金額</td>
-            <td style="text-align: center;">設計師</td>
-            <td style="text-align: center;">助理</td>
-            <td style="text-align: center;">設計內容</td>
-            <td style="text-align: center;">刪除紀錄</td>
-          </tr>
-          <tr v-for="(info, index) in reverseInfo">
-            <template>
-              <td>{{info.mobile}}</td>
-              <td>{{info.date}}</td>
-              <td>{{info.totalCost}}</td>
-              <td>{{info.designer}}</td>
-              <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
-              <td>{{info.detail}}</td>
-              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
-            </template>
-          </tr>
-        </tbody>
-      </table>
+      <div class="col-xs-12">
+        <table border="1" class="table table-striped table-bordered table-hover col-xs-12" v-show="mobile === bossMobile && confirmLogIn">
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><span  @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+              會員電話 <i class="fa fa-sort"></i></span></td>
+              <td style="text-align: center;"><span @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+              日期 <i class="fa fa-sort"></i></span></td>
+              <td style="text-align: center;">消費金額</td>
+              <td style="text-align: center;">設計師</td>
+              <td style="text-align: center;">助理</td>
+              <td style="text-align: center;">設計內容</td>
+              <td style="text-align: center;">刪除紀錄</td>
+            </tr>
+            <tr v-for="(info, index) in reverseInfo">
+              <template>
+                <td>{{info.mobile}}</td>
+                <td>{{info.date}}</td>
+                <td>{{info.totalCost}}</td>
+                <td>{{info.designer}}</td>
+                <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
+                <td>{{info.detail}}</td>
+                <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <!-- Message Modal -->
       <div v-show="messageModal">
         <transition name="modal">
@@ -240,7 +246,7 @@ export default {
       dye: '',
       burn: '',
       wash: '',
-      addEmpBtnDisabled: true, // 新增員工按鍵鎖定
+      addEmpBtn: false, // 新增員工按鍵
       commonCancel: false, // modal取消button
       commonCheck: false, // modal確認button
       delRecordBtn: false, // modal刪除紀錄button
@@ -502,8 +508,8 @@ export default {
       }
       return sortInfo;
     },
-    delEmpBtnDisabled: function() {
-      return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? false : true;
+    delEmpBtn: function() {
+      return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? true : false;
     }
   },
   beforeMount() {
@@ -549,7 +555,7 @@ export default {
   },
   watch: {
     addEmpName: function(val) {
-      this.addEmpBtnDisabled = val !== '' ? false : true;
+      this.addEmpBtn = val !== '' ? true : false;
     }
   },
   directives: {
