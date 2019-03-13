@@ -9,8 +9,13 @@
         </transition>
       </div>
       <!-- change member area -->
-      <div align="right">
-        <button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button>
+      <div class="col-xs-12">
+        <table width="100%">
+          <tr>
+            <td style="width:50%;text-align:left"><button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button></td>
+            <td style="width:50%;text-align:right">{{today | dateFormat}}</td>
+          </tr>
+        </table>
       </div>
 
 			<div align="center"><h1>TCS</h1></div>
@@ -41,7 +46,7 @@
                 <input type="radio" name="r" value="1" v-model="addEmpType" />設計師
                 <input type="radio" name="r" value="2" v-model="addEmpType" />助理
                 <input class="form-controll" type="text" placeholder="請輸入名字" v-model="addEmpName" />
-                <div class="btn btn-info btn-sm" @click="addEmp()" :disabled="addEmpBtnDisabled"><i class="fa fa-user"></i> 確認新增</div>
+                <div class="btn btn-info btn-sm" @click="modifyEmp(1)" v-show="addEmpBtn"><i class="fa fa-user"></i> 確認新增</div>
                 </span>
                 </div>
               </transition>
@@ -58,7 +63,7 @@
                       <option value="none">請選擇</option>
                       <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
                     </select>
-                    <button class="btn btn-danger btn-sm" @click="deleteEmp()" :disabled="delEmpBtnDisabled"><i class="fa fa-times"></i> 確認刪除</button>
+                    <button class="btn btn-danger btn-sm" @click="modifyEmp(2)" v-show="delEmpBtn"><i class="fa fa-times"></i> 確認刪除</button>
                   </span>
                 </div>
               </transition>
@@ -127,10 +132,10 @@
       <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === bossMobile && confirmLogIn">
         <tbody>
           <tr>
-            <td style="text-align: center;">會員電話 
-            <i class="fa fa-sort" @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
-            <td style="text-align: center;">設計日期 
-            <i class="fa fa-sort" @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer"></i></td>
+              <td style="text-align: center;"><span  @click="sortByDate=false;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+              會員電話 <i class="fa fa-sort"></i></span></td>
+              <td style="text-align: center;"><span @click="sortByDate=true;sortFromBigToSmall=!sortFromBigToSmall" style="cursor:pointer">
+              日期 <i class="fa fa-sort"></i></span></td>
             <td style="text-align: center;">消費金額</td>
             <td style="text-align: center;">設計師</td>
             <td style="text-align: center;">助理</td>
@@ -169,6 +174,8 @@
                     <button class="btn btn-default btn-sm" v-show="commonCancel" @click="resetModal()">取消</button>
                     <button class="btn btn-primary btn-sm" v-show="commonCheck" @click="resetModal()">確認</button>
                     <button class="btn btn-primary btn-sm" v-show="delRecordBtn" @click="delRecord(delRecordID,null,null)">確認刪除</button>
+                    <button class="btn btn-primary btn-sm" v-show="confirmAddEmpBtn" @click="modifyEmp(1)">確認</button>
+                    <button class="btn btn-primary btn-sm" v-show="confirmDelEmpBtn" @click="modifyEmp(2)">確認</button>
                   </div>
                 </div>
             </div>
@@ -199,6 +206,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+var timer;
 const empRef = firebase.database().ref('/employees/');
 const customerRef = firebase.database().ref('/customers/');
 const bossRef = firebase.database().ref('/boss/');
@@ -221,6 +230,8 @@ export default {
       messageModal: false, // 開啟modal
       infoMsg: '', // modal訊息
       modifyEmpArea: false, // 員工異動區域
+      confirmAddEmpBtn: false, // 確認新增員工
+      confirmDelEmpBtn: false, // 確認刪除員工
       designYear: new Date().getFullYear(), // 預設年
       designMonth: new Date().getMonth()+1, // 預設月
       designDate: new Date().getDate(), // 預設日
@@ -232,7 +243,7 @@ export default {
       dye: '',
       burn: '',
       wash: '',
-      addEmpBtnDisabled: true, // 新增員工按鍵鎖定
+      addEmpBtn: false, // 新增員工按鍵
       commonCancel: false, // modal取消button
       commonCheck: false, // modal確認button
       delRecordBtn: false, // modal刪除紀錄button
@@ -241,30 +252,96 @@ export default {
       sortFromBigToSmall: true, // 預設排序由大到小
       blockModal: false,
       blockModalMsg: '',
-      bossMobile: ''
+      bossMobile: '',
+      today: new Date()
     }
   },
   methods: {
     setBlockModal(msg) {
+      const vm = this;
       this.blockModal = true;
       this.blockModalMsg = msg;
-      // Add bind(this) to your setTimeout callback function
+      /**因為function() {}這裡的獨立作用域指向全局(也就是window)
+       * 而window裡沒有blockModal這個變數，所以必須先使用const vm = this;
+       * 然後在setTimeout裡使用vm.blockModal
+       */
       setTimeout(function() {
         this.blockModal = false;
+        // 若不用vm.blockModal，可以用.bind(this)告訴程式是針對這個Vue
       }.bind(this), 3000);
     },
     /** 新增員工 */
-    addEmp() {
+    modifyEmp(type) {
       const vm = this;
       console.log({'emp name':vm.addEmpName});
       vm.loading = 'block';
-      empRef.push({
-        empName: vm.addEmpName,
-        empType: vm.addEmpType,
-        timeStamp: vm.getTime()
-      });
-      vm.loading = 'none';
-      vm.setBlockModal('新增成功');
+      if(type === 1) { // 新增員工
+        if(vm.confirmAddEmpBtn === false) {
+          vm.callModal(3, '確定新增員工 ' + vm.addEmpName + ' 嗎？');
+        }else {
+          empRef.push({
+            empName: vm.addEmpName,
+            empType: vm.addEmpType,
+            timeStamp: vm.getTime()
+          });
+          vm.loading = 'none';
+          vm.resetModal();
+          vm.setBlockModal('新增成功');
+          vm.resetAllInput();
+        }
+      }else if(type === 2) { // 刪除員工
+        // init delete employee object
+        var delEmpObj = {
+          designer: '',
+          assistant: '',
+          desId: '',
+          assId: '',
+          msg: '確定刪除'
+        };
+        // Designer
+        if(vm.delDesignerName !== 'none') {
+          for(var i = 0; i < vm.empObjList.length; i++) {
+            if(vm.empObjList[i].empName === vm.delDesignerName) {
+              vm.loading = 'block';
+              var id = vm.empObjList[i].id;
+              delEmpObj.designer = vm.delDesignerName;
+              delEmpObj.desId = id;
+            }
+          }
+        }
+        // Assistant
+        if(vm.delAssistantName !== 'none') {
+          for(var i = 0; i < vm.empObjList.length; i++) {
+            if(vm.empObjList[i].empName === vm.delAssistantName) {
+              vm.loading = 'block';
+              var id = vm.empObjList[i].id;
+              delEmpObj.assistant = vm.delAssistantName;
+              delEmpObj.assId = id;
+            }
+          }
+        }
+        console.log(delEmpObj);
+        if(vm.confirmDelEmpBtn === false) {
+          delEmpObj.msg += delEmpObj.designer;
+          delEmpObj.msg += delEmpObj.designer === '' ? delEmpObj.assistant : 
+          delEmpObj.assistant === '' ? delEmpObj.assistant : '和' + delEmpObj.assistant;
+          vm.callModal(4, delEmpObj.msg + '嗎？');
+        }else {
+          if(delEmpObj.desId !== '') {
+            const desRef = firebase.database().ref('/employees/' + delEmpObj.desId);
+            desRef.set({});
+          }
+          if(delEmpObj.assId !== '') {
+            const assRef = firebase.database().ref('/employees/' + delEmpObj.assId);
+            assRef.set({});
+          }
+          // 重置
+          vm.loading = 'none';
+          vm.resetModal();
+          vm.setBlockModal('刪除成功');
+          vm.resetAllInput();
+        }
+      }
     },
     getTime() {
       const now = new Date();
@@ -272,40 +349,6 @@ export default {
       const month = now.getMonth()+1;
       const date = now.getDate();
       return year+'-'+month+'-'+date;
-    },
-    /** 刪除員工 */
-    deleteEmp() {
-      const vm = this;
-      // Designer
-      if(vm.delDesignerName !== 'none') {
-        for(var i = 0; i < vm.empObjList.length; i++) {
-          if(vm.empObjList[i].empName === vm.delDesignerName) {
-            vm.loading = 'block';
-            var id = vm.empObjList[i].id;
-            const delRef = firebase.database().ref('/employees/' + id);
-            delRef.set({});
-            // 重置
-            vm.delDesignerName = 'none';
-            // vm.messageModal = true;
-            // vm.infoMsg = '刪除成功';
-          }
-        }
-      }
-      // Assistant
-      if(vm.delAssistantName !== 'none') {
-        for(var i = 0; i < vm.empObjList.length; i++) {
-          if(vm.empObjList[i].empName === vm.delAssistantName) {
-            vm.loading = 'block';
-            var id = vm.empObjList[i].id;
-            const delRef = firebase.database().ref('/employees/' + id);
-            delRef.set({});
-            // 重置
-            vm.delAssistantName = 'none';
-          }
-        }
-      }
-      vm.loading = 'none';
-      vm.setBlockModal('刪除成功');
     },
     /** 日期調整 */
     changeDay() {
@@ -400,15 +443,19 @@ export default {
       const vm = this;
       vm.resetModal(); // 先重置Modal
       vm.messageModal = true;
-      vm.infoMsg = '';
+      vm.infoMsg = msg;
       if(type === 1) { // 一般訊息
         vm.commonCancel = true;
         vm.commonCheck = true;
-        vm.infoMsg = msg;
       }else if(type === 2) { // 刪除紀錄
         vm.commonCancel = true;
-        vm.infoMsg = msg;
         vm.delRecordBtn = true;
+      }else if(type === 3) { // 新增員工
+        vm.commonCancel = true;
+        vm.confirmAddEmpBtn = true;
+      }else if(type === 4) { // 刪除員工
+        vm.commonCancel = true;
+        vm.confirmDelEmpBtn = true;
       }
     },
     resetModal() {
@@ -420,6 +467,8 @@ export default {
       vm.commonCancel = false;
       vm.commonCheck = false;
       vm.delRecordBtn = false;
+      vm.confirmDelEmpBtn = false;
+      vm.confirmAddEmpBtn = false;
     },
     login() {
       this.resetModal();
@@ -494,8 +543,8 @@ export default {
       }
       return sortInfo;
     },
-    delEmpBtnDisabled: function() {
-      return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? false : true;
+    delEmpBtn: function() {
+      return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? true : false;
     }
   },
   beforeMount() {
@@ -538,10 +587,13 @@ export default {
     for(var i = 1; i<= 31; i++) {
       vm.allDates.push(i);
     }
+    timer = setInterval(() => {
+      vm.today = new Date();
+    }, 1000);
   },
   watch: {
     addEmpName: function(val) {
-      this.addEmpBtnDisabled = val !== '' ? false : true;
+      this.addEmpBtn = val !== '' ? true : false;
     }
   },
   directives: {
@@ -550,6 +602,14 @@ export default {
         el.focus();
       }
     }
+  },
+  filters: {
+    dateFormat: function(el) {
+      return moment(el).format("HH:mm:ss");
+    }
+  },
+  beforeDestroy() {
+    clearInterval(timer);
   }
 }
 </script>
