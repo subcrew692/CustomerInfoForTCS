@@ -13,7 +13,9 @@
         <table width="100%">
           <tr>
             <td style="width:50%;text-align:left"><button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button></td>
-            <td style="width:50%;text-align:right">{{today | dateFormat}}</td>
+            <td style="width:50%;text-align:right">{{today | dateFormat}}
+              <router-link to="/">回首頁 <i class="fa fa-home"></i></router-link>
+            </td>
           </tr>
         </table>
       </div>
@@ -34,8 +36,8 @@
             <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
               <span style="cursor:pointer;" @click="modifyEmpArea = !modifyEmpArea">
                 <strong><i class="fa fa-user"></i> 員工異動 
-                <i class="fa fa-chevron-down" v-if="!modifyEmpArea"></i>
-                <i class="fa fa-chevron-up" v-if="modifyEmpArea"></i></strong></span></div>
+                <i class="fa fa-chevron-down" v-if="modifyEmpArea"></i>
+                <i class="fa fa-chevron-up" v-if="!modifyEmpArea"></i></strong></span></div>
             </td>
           </tr>
           <tr>
@@ -45,7 +47,7 @@
                 <span>新增
                 <input type="radio" name="r" value="1" v-model="addEmpType" />設計師
                 <input type="radio" name="r" value="2" v-model="addEmpType" />助理
-                <input class="form-controll" type="text" placeholder="請輸入名字" v-model="addEmpName" />
+                <input class="form-control selectionAuto" type="text" placeholder="請輸入名字" v-model="addEmpName" />
                 <div class="btn btn-info btn-sm" @click="modifyEmp(1)" v-show="addEmpBtn"><i class="fa fa-user"></i> 確認新增</div>
                 </span>
                 </div>
@@ -55,11 +57,12 @@
               <transition name="fade">
                 <div class="panel-heading" style="font-family:consolas;text-align:right;"  v-show="modifyEmpArea">
                   <span>刪除
-                    設計師:<select v-model="delDesignerName">
+                    設計師:<select v-model="delDesignerName" class="form-control selectionAuto">
                       <option value="none">請選擇</option>
-                      <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
+                      <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1' && emp.empName !== 'Sunny'">
+                        {{emp.empName}}</option>
                     </select>
-                    助理:<select v-model="delAssistantName">
+                    助理:<select v-model="delAssistantName" class="form-control selectionAuto">
                       <option value="none">請選擇</option>
                       <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
                     </select>
@@ -76,32 +79,41 @@
         <tbody>
           <tr>
             <td style="height:50px; width:23%"><i class="far fa-calendar-alt"></i>日期&nbsp;
-              <select v-model="designYear" @change="changeDay()"><option v-for="year in allYears">{{year}}</option></select>/
-              <select v-model="designMonth" @change="changeDay()"><option v-for="month in allMonths">{{month}}</option></select>/
-              <select v-model="designDate"><option v-for="date in allDates">{{date}}</option></select>
+              <select v-model="designYear" @change="changeDay()" class="form-control selectionAuto"><option v-for="year in allYears">{{year}}</option></select>/
+              <select v-model="designMonth" @change="changeDay()" class="form-control selectionAuto"><option v-for="month in allMonths">{{month}}</option></select>/
+              <select v-model="designDate" class="form-control selectionAuto"><option v-for="date in allDates">{{date}}</option></select>
             </td>
             <td style="width:23%;"><i class="fa fa-dollar"></i>總金額:&nbsp;&nbsp;{{totalCost}}</td>
             <td style="width:23%;"><i class="fa fa-scissors"></i>設計師&nbsp;&nbsp;
-            <select v-model="workDesignerName">
+            <select v-model="workDesignerName" class="form-control selectionAuto">
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '1'">{{emp.empName}}</option>
             </select></td>
             <td style="width:23%;"><i class="fa fa-book"></i>助理&nbsp;&nbsp;
-            <select v-model="workAssistantName">
+            <select v-model="workAssistantName" class="form-control selectionAuto">
               <option value="none">請選擇</option>
               <option v-for="emp in empObjList" :key="emp.id" :value="emp.empName" v-show="emp.empType == '2'">{{emp.empName}}</option>
             </select></td>
             <td rowspan="2"><div class="btn btn-success btn-sm" @click="addCustomerData();"><i class="fa fa-save"></i> 新增資料</div></td>
           </tr>
           <tr>
+            <!-- 設計內容 -->
             <td style="height:50px;">
-            剪&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="cut"/></td>
+            剪&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="cut" class="form-control selectionAuto"/>
+            <input type="checkbox" name="1" value="cutAssistant" id="cutAssistant" v-model="assistantHelps">
+            <label for="cutAssistant"><span></span>助理</label></td>
             <td style="height:50px;">
-            染&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="dye"/></td>
+            染&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="dye" class="form-control selectionAuto"/>
+            <input type="checkbox" name="1" value="dyeAssistant" id="dyeAssistant" v-model="assistantHelps">
+            <label for="dyeAssistant"><span></span>助理</label></td>
             <td style="height:50px;">
-            燙&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="burn"/></td>
+            燙&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="burn" class="form-control selectionAuto"/>
+            <input type="checkbox" name="1" value="burnAssistant" id="burnAssistant" v-model="assistantHelps">
+            <label for="burnAssistant"><span></span>助理</label></td>
             <td style="height:50px;">
-            洗&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="wash"/></td>
+            洗&nbsp;&nbsp;<input type="text" style="width:75px;" v-model.number="wash" class="form-control selectionAuto"/>
+            <input type="checkbox" name="1" value="washAssistant" id="washAssistant" v-model="assistantHelps">
+            <label for="washAssistant"><span></span>助理</label></td>
 					</tr>
 			  </tbody>
 			</table>
@@ -123,7 +135,7 @@
               <td>{{info.designer}}</td>
               <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
               <td>{{info.detail}}</td>
-              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
+              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost, info.assistant)"></i></td>
             </template>
           </tr>
         </tbody>
@@ -150,7 +162,7 @@
               <td>{{info.designer}}</td>
               <td>{{info.assistant === 'none' ? '' : info.assistant}}</td>
               <td>{{info.detail}}</td>
-              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost)"></i></td>
+              <td><i class="fa fa-times" style="cursor:pointer;color:red;" @click="delRecord(info.id, info.date, info.totalCost, info.assistant)"></i></td>
             </template>
           </tr>
         </tbody>
@@ -173,7 +185,7 @@
                   <div class="modal-footer">
                     <button class="btn btn-default btn-sm" v-show="commonCancel" @click="resetModal()">取消</button>
                     <button class="btn btn-primary btn-sm" v-show="commonCheck" @click="resetModal()">確認</button>
-                    <button class="btn btn-primary btn-sm" v-show="delRecordBtn" @click="delRecord(delRecordID,null,null)">確認刪除</button>
+                    <button class="btn btn-primary btn-sm" v-show="delRecordBtn" @click="delRecord(delRecordID,null,null,delRecordAst)">確認刪除</button>
                     <button class="btn btn-primary btn-sm" v-show="confirmAddEmpBtn" @click="modifyEmp(1)">確認</button>
                     <button class="btn btn-primary btn-sm" v-show="confirmDelEmpBtn" @click="modifyEmp(2)">確認</button>
                   </div>
@@ -192,10 +204,12 @@
                     <h2 class="modal-title" style="font-family:consolas">Log in</h2>
                   </div>
                   <div class="modal-body">
-                    <input type="tel" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
+                    <input type="tel" class="form-control" v-model="mobile" placeholder="請輸入電話號碼" v-on:keyup.13="login()" v-focus/>
                   </div>
                   <div class="modal-footer">
-                    <button class="btn btn-primary btn-sm" @click="login()" :disabled="mobile===''">登入</button>
+                    <router-link to="/" class="btn btn-default btn-sm">回上層 <i class="fa fa-reply"></i></router-link>
+                    <button class="btn btn-primary btn-sm" @click="login()" :style="{'display': mobile==='' ? 'none' : 'inline-block'}">
+                    登入 <i class="fa fa-share-square"></i></button>
                   </div>
                 </div>
             </div>
@@ -211,6 +225,7 @@ var timer;
 const empRef = firebase.database().ref('/employees/');
 const customerRef = firebase.database().ref('/customers/');
 const bossRef = firebase.database().ref('/boss/');
+const salaryRef = firebase.database().ref('/salary/');
 export default {
   name: 'HelloWorld',
   data () {
@@ -243,17 +258,20 @@ export default {
       dye: '',
       burn: '',
       wash: '',
+      assistantHelps: [], // 助理協助項目
       addEmpBtn: false, // 新增員工按鍵
       commonCancel: false, // modal取消button
       commonCheck: false, // modal確認button
       delRecordBtn: false, // modal刪除紀錄button
       delRecordID: '', // 刪除紀錄的ID
+      delRecordAst: '', // 刪除紀錄的助理
       sortByDate: true, // 預設以日期排序
       sortFromBigToSmall: true, // 預設排序由大到小
       blockModal: false,
       blockModalMsg: '',
       bossMobile: '',
-      today: new Date()
+      today: new Date(),
+      salaryDataForDeleteUse: []
     }
   },
   methods: {
@@ -379,29 +397,97 @@ export default {
         return false;
       }
       if(vm.checkValueIsNumber()) {
-        vm.loading = 'block';
-        var date = vm.designYear + '/' + vm.designMonth + '/' + vm.designDate;
-        var cut = vm.cut > 0 ? '剪: ' + vm.cut : '';
-        var dye = vm.dye > 0 ? '染: ' + vm.dye : '';
-        var burn = vm.burn > 0 ? '燙: ' + vm.burn : '';
-        var wash = vm.wash > 0 ? '洗: ' + vm.wash : '';
-        var detail = cut + dye + burn + wash;
-        console.log(date);
-        customerRef.push({
-          mobile: vm.mobile,
-          date: date,
-          totalCost: vm.totalCost,
-          designer: vm.workDesignerName,
-          assistant: vm.workAssistantName,
-          cut: cut,
-          dye: dye,
-          burn: burn,
-          wash: wash,
-          detail: detail
-        });
-        vm.loading = 'none';
-        vm.setBlockModal('紀錄新增成功');
+        if(vm.checkAssistantCheckbox()) {
+          vm.loading = 'block';
+          var date = vm.designYear + '/' + vm.designMonth + '/' + vm.designDate;
+          var cut = vm.cut > 0 ? '剪: ' + vm.cut : '';
+          var dye = vm.dye > 0 ? '染: ' + vm.dye : '';
+          var burn = vm.burn > 0 ? '燙: ' + vm.burn : '';
+          var wash = vm.wash > 0 ? '洗: ' + vm.wash : '';
+          var detail = cut + dye + burn + wash;
+          var firebaseKey = customerRef.push({
+            mobile: vm.mobile,
+            date: date,
+            totalCost: vm.totalCost,
+            designer: vm.workDesignerName,
+            assistant: vm.workAssistantName,
+            cut: cut,
+            dye: dye,
+            burn: burn,
+            wash: wash,
+            detail: detail
+          }).getKey();
+          vm.calculateAssistantHelps(firebaseKey);
+          vm.loading = 'none';
+          vm.setBlockModal('紀錄新增成功');
+        }else {
+          vm.setBlockModal('金額有誤');
+        }
       }
+    },
+    /** 計算助理費用 */
+    calculateAssistantHelps(firebaseKey) {
+      const vm = this;
+      const assistantHelps = vm.assistantHelps;
+      var date = vm.designYear + '/' + vm.designMonth + '/' + vm.designDate;
+      var detailStr = '';
+      var totalMoney = 0;
+      let itemDetail = {};
+      if(assistantHelps.length > 0) {
+        assistantHelps.forEach(item => {
+          switch(item) {
+            case 'cutAssistant':
+              itemDetail.cut = Math.floor(Number(vm.cut) / 10);
+              detailStr += '剪: ' + itemDetail.cut;
+              totalMoney += itemDetail.cut;
+              break;
+            case 'dyeAssistant':
+              itemDetail.dye = Math.floor(Number(vm.dye) / 10);
+              detailStr += '染: ' + itemDetail.dye;
+              totalMoney += itemDetail.dye;
+              break;
+            case 'burnAssistant':
+              itemDetail.burn = Math.floor(Number(vm.burn) / 10);
+              detailStr += '燙: ' + itemDetail.burn;
+              totalMoney += itemDetail.burn;
+              break;
+            case 'washAssistant':
+              itemDetail.wash = 30;
+              detailStr += '洗: ' + itemDetail.wash;
+              totalMoney += itemDetail.wash;
+              break;
+          }
+        });
+        itemDetail.date = date;
+        itemDetail.assistant = vm.workAssistantName;
+        itemDetail.recordKey = firebaseKey;
+        itemDetail.detail = detailStr;
+        itemDetail.totalMoney = totalMoney;
+        itemDetail.designer = vm.workDesignerName;
+        salaryRef.child(itemDetail.assistant).push(itemDetail);
+      }
+    },
+    /** 檢查助理checkbox打勾是否有填金額 */
+    checkAssistantCheckbox() {
+      const vm = this;
+      const assistantHelps = vm.assistantHelps;
+      var inputCurrect = true;
+      if(assistantHelps.length > 0) {
+        assistantHelps.forEach(item => {
+          if(item === 'cutAssistant' && vm.cut === '') {
+            inputCurrect = false;
+          }else if(item === 'dyeAssistant' && vm.dye === '') {
+            inputCurrect = false;
+          }else if(item === 'burnAssistant' && vm.burn === '') {
+            inputCurrect = false;
+          }else if(item === 'washAssistant' && vm.wash === '') {
+            inputCurrect = false;
+          }else {
+            inputCurrect = true;
+          }
+        });
+      }
+      return inputCurrect;
     },
     /** 先檢查消費欄位是否皆為數字 */
     checkValueIsNumber() {
@@ -422,16 +508,37 @@ export default {
       }
     },
     /** 刪除紀錄 */
-    delRecord(id, dat, money) {
+    delRecord(id, dat, money, ast) {
       const vm = this;
       vm.loading = 'block';
-      console.log(id);
       if(vm.delRecordBtn === false) {
         vm.delRecordID = id;
+        vm.delRecordAst = ast;
         vm.callModal(2, '刪除資料：' + dat + '，消費金額：$' + money);
       }else {
+        // 刪除紀錄
         const delRef = firebase.database().ref('/customers/' + id);
         delRef.set({});
+        /** json格式如下
+         * salary: {
+         *  Eason: [{key: {rec: }, {key: {rec: }}],
+         *  Amber: [{key: {rec: }, {key: {rec: }}]
+         * }
+         */
+        // 先filter找出該筆刪除資料的助理的所有紀錄
+        const deleteDataAst = vm.salaryDataForDeleteUse.filter(item => {
+          console.log(`${item.id} === ${ast} : ${item.id === ast}`);
+          return item.id === ast;
+        });
+        // 找出當初新增資料塞的對應key
+        const delKey = Object.keys(deleteDataAst[0]).find(key =>  {
+          // console.log(deleteDataAst[0][key]);
+          return deleteDataAst[0][key].recordKey === id;
+        });
+        // console.log(delKey);
+        const salaryDelRef = firebase.database().ref('/salary/' + ast + '/' + delKey);
+        salaryDelRef.set({});
+
         vm.loading = 'none';
         vm.resetModal(); // 關閉message modal
         vm.setBlockModal('紀錄刪除成功');
@@ -499,6 +606,9 @@ export default {
       vm.modifyEmpArea = false;
       vm.delDesignerName = 'none';
       vm.delAssistantName = 'none';
+    },
+    genUuid() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {var r = Math.random()*16|0,v=c=='x'?r:r&0x3|0x8;return v.toString(16);});
     }
   },
   computed: {
@@ -549,7 +659,7 @@ export default {
   },
   beforeMount() {
     this.loading = 'block';
-    console.log('beforeMount');
+    // console.log('beforeMount');
   },
   updated() {
     if(this.empObjList.length > 0 && this.bossMobile !== '') {
@@ -576,14 +686,21 @@ export default {
     });
     bossRef.on('value', function(snapshot) {
       const val = snapshot.val();
-      console.log(val);
       vm.bossMobile = val;
     });
+    salaryRef.on('value', function(snapshot) {
+      const val = snapshot.val();
+      const data = val
+        ? Object.keys(val).map(key => ({ id: key, ...val[key] }))
+        : null
+      vm.salaryDataForDeleteUse = data;
+    })
     // init year, month, date
     const now = new Date();
     for(var i = 1911; i <= now.getFullYear(); i++) {
       vm.allYears.push(i);
     }
+    vm.allYears.sort((a, b) => b - a);
     for(var i = 1; i<= 31; i++) {
       vm.allDates.push(i);
     }
@@ -636,6 +753,13 @@ export default {
   width:50%;
   margin: 0px auto;
 }
+/** selection */
+.selectionAuto {
+  width: auto;
+  display: inline;
+  height: auto;
+  padding: 1px 1px;
+}
 /**  loading */
 .loading {
     position: absolute;
@@ -682,7 +806,7 @@ export default {
     -webkit-transform: scale(1.0);
   }
 }
-
+/** fade */
 .fade-enter-active, 
 .fade-leave-active {
   transition: opacity .8s;
@@ -694,7 +818,7 @@ export default {
 .table_record {
   padding: 10px;
 }
-
+/** black modal */
 .icard-list {
     position: fixed;
     top: 80px;
@@ -710,5 +834,28 @@ export default {
     color: #fff;
     text-align: center;
     margin: 4px 0px 4px 0px;
+}
+
+/** Checkbox */
+input[type="checkbox"] {
+    display:none;
+}
+
+input[type="checkbox"] + label {
+    color:#000000;
+}
+
+input[type="checkbox"] + label span {
+    display:inline-block;
+    width:19px;
+    height:19px;
+    margin:-2px 0 0 0;
+    vertical-align:middle;
+    background:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/210284/check_radio_sheet.png) left top no-repeat;
+    cursor:pointer;
+}
+
+input[type="checkbox"]:checked + label span {
+    background:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/210284/check_radio_sheet.png) -19px top no-repeat;
 }
 </style>
