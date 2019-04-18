@@ -38,6 +38,10 @@
                     <div v-for="per in astEveryMonthSalary" style="text-align:right;">
                         <h3 v-if="emp.empName === per.name">{{emp.empName}}薪水{{selectedMonth}}月份：{{per.totalSalary}}</h3>
                     </div>
+                    <!-- 設計師月付 -->
+                    <div v-for="per in desEveryMonthSalary" style="text-align:right;">
+                        <h3 v-if="emp.empName === per.name">{{emp.empName}}&nbsp;&nbsp;{{selectedMonth}}月份需支付：{{per.designerPay}}</h3>
+                    </div>
                     <table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                         <thead>
                             <tr role="row">
@@ -57,6 +61,16 @@
                             aria-label="CSS grade: activate to sort column ascending" style="width: 135px;">由誰給付</th></tr>
                         </thead>
                         <tbody>
+                        <!-- 設計師內容 -->
+                        <tr v-for="(salary, index) in arrangedDBData" v-if="salary.designer === emp.empName"
+                        v-bind:class="{'gradeA odd': (index + 1) % 2 === 0, 'gradeA even': (index + 1) % 2 !== 0}">
+                            <td class="center">{{salary.date}}</td>
+                            <td class="center">{{salary.assistant}}</td>
+                            <td class="center">{{salary.detail}}</td>
+                            <td class="center">{{salary.totalMoney}}</td>
+                            <td class="center">{{salary.designer}}</td>
+                        </tr>
+                        <!-- 助理內容 -->
                         <tr v-for="(salary, index) in arrangedDBData" v-if="salary.assistant === emp.empName"
                         v-bind:class="{'gradeA odd': (index + 1) % 2 === 0, 'gradeA even': (index + 1) % 2 !== 0}">
                             <td class="center">{{salary.date}}</td>
@@ -107,7 +121,7 @@
 </template>
 
 <script>
-const bossRef = firebase.database().ref('/boss/');
+const bossRef = firebase.database().ref('/bossPassword/');
 const empRef = firebase.database().ref('/employees');
 const salaryRef = firebase.database().ref('/salary/');
 Date.prototype.yyyymmddBySlash = function() {
@@ -212,6 +226,22 @@ export default {
                 }
             }
             return rtnArr;
+        },
+        desEveryMonthSalary: function() {
+            const vm = this;
+            let rtnArr = [];
+            if(vm.loginPermit) {
+                if(vm.arrangedDBData) {
+                    vm.empObjList.filter(obj => obj.empType == 1).forEach(emp => {
+                        let designerPay = 0;
+                        vm.arrangedDBData.filter(arranged => arranged.designer === emp.empName).forEach(item => {
+                            designerPay += item.totalMoney;
+                        });
+                        rtnArr.push({name: emp.empName, designerPay: designerPay});
+                    });
+                }
+            }
+            return rtnArr;
         }
     },
     mounted() {
@@ -226,7 +256,8 @@ export default {
                 ? Object.keys(val).map(key => ({ id: key, ...val[key] }))
                 : null
             // 只帶出助理
-            vm.empObjList = empData.filter(emp => emp.empType === '2');
+            // vm.empObjList = empData.filter(emp => emp.empType === '2');
+            vm.empObjList = empData;
         });
         salaryRef.on('value', function(snapshot) {
             const val = snapshot.val();

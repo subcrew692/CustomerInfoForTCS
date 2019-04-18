@@ -118,6 +118,24 @@
 			  </tbody>
 			</table>
       <!-- 顧客消費紀錄 -->
+      <div class="panel panel-default">
+      <div class="panel-heading customerRecord">
+      <div class="row">
+        <div class="col-sm-6" style="text-align:left;">
+          <div :style="{'display':(bossMobile === mobile && confirmLogIn ? 'inline' : 'none')}">
+          <i class="fa fa-phone"></i>以電話號碼搜尋
+          <input type="text" class="form-control selectionAuto circle" placeholder="  Search by mobile..." v-model="filterByMobile" />
+          </div>
+        </div>
+        <div class="col-sm-6" style="text-align:right;">
+          <input type="checkbox" name="2" value="viewConsumeDate" id="viewConsumeDate" v-model="viewConsumeDate">
+          <label for="viewConsumeDate"><span></span>使用日期搜尋</label>
+          <select v-model="customerViewYear" class="form-control selectionAuto" :disabled="viewConsumeDate.length === 0"><option v-for="year in allYears">{{year}}</option></select>年
+          <select v-model="customerViewMonth" class="form-control selectionAuto" :disabled="viewConsumeDate.length === 0"><option v-for="month in allMonths">{{month}}</option></select>月
+          
+        </div>
+      </div>
+      </div>
       <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== bossMobile">
         <tbody>
           <tr>
@@ -128,7 +146,7 @@
             <td style="text-align: center;">設計內容</td>
             <td style="text-align: center;">刪除紀錄</td>
           </tr>
-          <tr v-for="(info, index) in reverseInfo">
+          <tr v-for="(info, index) in customerPersonData">
             <template v-if="info.mobile === mobile">
               <td>{{info.date}}</td>
               <td>{{info.totalCost}}</td>
@@ -140,6 +158,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
       <!-- 老闆瀏覽所有紀錄 -->
       <table border="1" class="table table-striped table-bordered table-hover" v-show="mobile === bossMobile && confirmLogIn">
         <tbody>
@@ -224,7 +243,7 @@ import moment from 'moment';
 var timer;
 const empRef = firebase.database().ref('/employees/');
 const customerRef = firebase.database().ref('/customers/');
-const bossRef = firebase.database().ref('/boss/');
+const bossRef = firebase.database().ref('/bossMobile/');
 const salaryRef = firebase.database().ref('/salary/');
 export default {
   name: 'HelloWorld',
@@ -271,7 +290,11 @@ export default {
       blockModalMsg: '',
       bossMobile: '',
       today: new Date(),
-      salaryDataForDeleteUse: []
+      salaryDataForDeleteUse: [],
+      customerViewYear: new Date().getFullYear(), // 顧客瀏覽消費日期年
+      customerViewMonth:  new Date().getMonth() + 1, // 顧客瀏覽消費日期月
+      viewConsumeDate: [], // 是否使用日期瀏覽消費紀錄
+      filterByMobile: '' // 以電話號碼過濾搜尋
     }
   },
   methods: {
@@ -393,7 +416,7 @@ export default {
       const des = this.workDesignerName;
       const ast = this.workAssistantName;
       if(des === 'none') {
-        vm.setBlockModal('請選擇設計師');
+        vm.callModal(1, '請選擇設計師');
         return false;
       }
       if(vm.checkValueIsNumber()) {
@@ -421,7 +444,7 @@ export default {
           vm.loading = 'none';
           vm.setBlockModal('紀錄新增成功');
         }else {
-          vm.setBlockModal('金額有誤');
+          vm.callModal(1, '金額有誤');
         }
       }
     },
@@ -498,10 +521,10 @@ export default {
       msg += isNaN(vm.burn) ? '燙 ' : '';
       msg += isNaN(vm.wash) ? '洗 ' : '';
       if(msg.length > 0) {
-        vm.setBlockModal(msg + '欄位輸入有誤');
+        vm.callModal(1, msg + '欄位輸入有誤');
         return false;
       }else if(Number(vm.totalCost) === 0)  {
-        vm.setBlockModal('免費嗎??');
+        vm.callModal(1, '免費嗎??');
         return false;
       }else {
         return true;
@@ -606,9 +629,17 @@ export default {
       vm.modifyEmpArea = false;
       vm.delDesignerName = 'none';
       vm.delAssistantName = 'none';
+      vm.viewConsumeDate = [];
+      vm.customerViewYear = new Date().getFullYear();
+      vm.customerViewMonth = new Date().getMonth() + 1;
     },
     genUuid() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {var r = Math.random()*16|0,v=c=='x'?r:r&0x3|0x8;return v.toString(16);});
+    },
+    filterViewDate(date) {
+      const sameYear = new Date(date).getFullYear() === Number(this.customerViewYear);
+      const sameMonth = new Date(date).getMonth() + 1 === Number(this.customerViewMonth);
+      return sameYear && sameMonth;
     }
   },
   computed: {
@@ -629,11 +660,22 @@ export default {
       }
       return cost;
     },
+    /** 老闆瀏覽區 */
     reverseInfo: function() {
       const vm = this;
       var sortInfo = vm.consumeInfo;
       if(sortInfo !== null && sortInfo.length > 0) {
+        // 指定日期搜尋
+        if(vm.viewConsumeDate.length > 0) {
+          sortInfo = sortInfo.filter(consume => vm.filterViewDate(consume.date));
+        }
+        // 電話過濾搜尋
+        if(vm.filterByMobile !== '') {
+          const searchMobile = vm.filterByMobile;
+          sortInfo = sortInfo.filter(consume => consume.mobile.indexOf(searchMobile) >= 0);
+        }
         sortInfo.sort(function(a, b) {
+          // 依照日期排序
           if(vm.sortByDate) {
             if(vm.sortFromBigToSmall) {
               // 由大到小
@@ -655,6 +697,21 @@ export default {
     },
     delEmpBtn: function() {
       return (this.delDesignerName !== 'none' || this.delAssistantName !== 'none') ? true : false;
+    },
+    /** 顧客消費紀錄資料 */
+    customerPersonData: function() {
+      const vm = this;
+      const consumeArr = vm.consumeInfo;
+      let rtnInfo = [];
+      if(consumeArr !== null && consumeArr.length > 0) {
+        // 先以門號找出該會員的所有資料
+        rtnInfo = consumeArr.filter(consume => consume.mobile === vm.mobile);
+        // 若使用日期搜尋
+        if(vm.viewConsumeDate.length > 0) {
+          rtnInfo = consumeArr.filter(consume => vm.filterViewDate(consume.date));
+        }
+      }
+      return rtnInfo;
     }
   },
   beforeMount() {
@@ -697,7 +754,7 @@ export default {
     })
     // init year, month, date
     const now = new Date();
-    for(var i = 1911; i <= now.getFullYear(); i++) {
+    for(var i = 2015; i <= now.getFullYear(); i++) {
       vm.allYears.push(i);
     }
     vm.allYears.sort((a, b) => b - a);
@@ -806,6 +863,11 @@ export default {
     -webkit-transform: scale(1.0);
   }
 }
+
+.customerRecord {
+  background-color:azure;
+}
+
 /** fade */
 .fade-enter-active, 
 .fade-leave-active {
@@ -857,5 +919,10 @@ input[type="checkbox"] + label span {
 
 input[type="checkbox"]:checked + label span {
     background:url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/210284/check_radio_sheet.png) -19px top no-repeat;
+}
+
+/** 搜尋電話text */
+.circle {
+  border-radius: 20px;
 }
 </style>
