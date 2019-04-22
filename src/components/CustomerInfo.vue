@@ -12,15 +12,14 @@
       <div class="col-xs-12">
         <table width="100%">
           <tr>
-            <td style="width:50%;text-align:left"><button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button></td>
-            <td style="width:50%;text-align:right">{{today | dateFormat}}
+            <td style="width:30%;text-align:left"><button class="btn btn-default btn-sm" @click="changeMember()">切換會員</button></td>
+            <td style="width:40%;text-align:center"><img src="../assets/TCS_logo.jpg" class="logoStyle" /></td>
+            <td style="width:30%;text-align:right">{{today | dateFormat}}
               <router-link to="/">回首頁 <i class="fa fa-home"></i></router-link>
             </td>
           </tr>
         </table>
       </div>
-
-			<div align="center"><h1>TCS</h1></div>
 
       <!-- loading area -->
       <div class="loading" :style="{'display':loading, 'cursor':'wait'}">
@@ -33,7 +32,8 @@
       <table style="width:100%;">
         <tbody>
           <tr>
-            <td colspan="2" style="width:100%;"><div class="panel-heading" style="font-family:consolas;text-align:left;">
+            <td colspan="2" style="width:100%;">
+            <div class="panel-heading" :style="{'font-family':'consolas','text-align':'left','display':(bossMobile === mobile && confirmLogIn ? 'block' : 'none')}">
               <span style="cursor:pointer;" @click="modifyEmpArea = !modifyEmpArea">
                 <strong><i class="fa fa-user"></i> 員工異動 
                 <i class="fa fa-chevron-down" v-if="modifyEmpArea"></i>
@@ -124,7 +124,7 @@
         <div class="col-sm-6" style="text-align:left;">
           <div :style="{'display':(bossMobile === mobile && confirmLogIn ? 'inline' : 'none')}">
           <i class="fa fa-phone"></i>以電話號碼搜尋
-          <input type="text" class="form-control selectionAuto circle" placeholder="  Search by mobile..." v-model="filterByMobile" />
+          <input type="text" class="form-control selectionAuto circle" placeholder="Search by mobile..." v-model="filterByMobile" />
           </div>
         </div>
         <div class="col-sm-6" style="text-align:right;">
@@ -132,10 +132,10 @@
           <label for="viewConsumeDate"><span></span>使用日期搜尋</label>
           <select v-model="customerViewYear" class="form-control selectionAuto" :disabled="viewConsumeDate.length === 0"><option v-for="year in allYears">{{year}}</option></select>年
           <select v-model="customerViewMonth" class="form-control selectionAuto" :disabled="viewConsumeDate.length === 0"><option v-for="month in allMonths">{{month}}</option></select>月
-          
         </div>
       </div>
       </div>
+      
       <table border="1" class="table table-striped table-bordered table-hover" v-show="confirmLogIn && mobile !== bossMobile">
         <tbody>
           <tr>
@@ -924,5 +924,11 @@ input[type="checkbox"]:checked + label span {
 /** 搜尋電話text */
 .circle {
   border-radius: 20px;
+  padding: 2px 5px 2px 8px; /* 上 右 下 左*/
+}
+
+.logoStyle {
+  width: 100px;
+  height: 100px;
 }
 </style>
