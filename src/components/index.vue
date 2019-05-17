@@ -12,6 +12,12 @@
                             <td style="width:50%"><router-link to="/customerInfo">顧客消費 <i class="fa fa-edit"></i></router-link></td>
                             <td style="width:50%"><router-link to="/assistantSalary">員工薪資 <i class="fa fa-money"></i></router-link></td>
                         </tr>
+                        <tr>
+                            <!-- TODO
+                            <td style="width:50%"><router-link to="/customerAppointment">顧客預約 <i class="fa fa-book"></i></router-link></td>
+                            -->
+                            <td style="width:50%"> </td>
+                        </tr>
                     </table>
                 </div>
             </div>

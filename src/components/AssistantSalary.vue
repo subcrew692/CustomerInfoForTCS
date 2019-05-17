@@ -1,5 +1,18 @@
 <template>
   <div class="container">
+    <!-- 變更密碼 -->
+    <div style="text-align:right;">
+        <button class="btn btn-outline btn-danger btn-xs" @click="openChangePwdModal()">
+            變更密碼 <i class="fa fa-lock"></i></button>
+    </div>
+
+    <div class="icard-list" v-show="blockModal">
+        <transition name="fade">
+          <h4 class="closeWisdom" v-show="blockModal">{{blockModalMsg}}</h4>
+        </transition>
+    </div>
+
+    <!-- 檢視日期 -->
     <div class="panel">
         <table width="100%">
             <tr>
@@ -14,6 +27,7 @@
             </tr>
         </table>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">
             <table width="100%">
@@ -94,7 +108,7 @@
             <div class="modal-wrapper">
                 <div class="modal-content" style="width:30%;">
                   <div class="modal-header">
-                    <h3>身分驗證</h3>
+                    <h3>{{modalHeadMsg}}</h3>
                     <span style="color:red;">{{loginFailMsg}}</span>
                   </div>
                   <div class="modal-body">
@@ -106,11 +120,17 @@
                         @mouseleave="hoverPwdEye=false;"><i class="fa fa-eye"></i></button></span>
                     </div>
                   </div>
-                  <div class="modal-footer">
+                  <div class="modal-footer" v-if="!isChangePassword">
                     <router-link to="/" class="btn btn-default btn-sm">回上層 <i class="fa fa-reply"></i></router-link>
                     <button class="btn btn-primary btn-sm" @click="login()" 
                     :style="{'display': loginAccount==='' ? 'none' : 'inline-block'}">
                     確認登入 <i class="fa fa-share-square"></i></button>
+                  </div>
+                  <div class="modal-footer" v-if="isChangePassword">
+                    <button class="btn btn-default btn-sm" @click="closeModal()">取消 <i class="fa fa-times"></i></button>
+                    <button class="btn btn-primary btn-sm" @click="changePassword()" 
+                    :style="{'display': loginAccount==='' ? 'none' : 'inline-block'}">
+                    確認更改 <i class="fa fa-check"></i></button>
                   </div>
                 </div>
             </div>
@@ -139,6 +159,7 @@ export default {
     data() {
         return {
             loginModal: true, // 登入Modal
+            modalHeadMsg: '身分驗證', // 登入Modal的header
             loginAccount: '', // 登入帳號
             bossAccount: '', // 老闆帳號
             empObjList: [], // 員工陣列
@@ -149,18 +170,22 @@ export default {
             allSalaryData: [], // 助理在DB的所有資料
             loginPermit: false,
             hoverPwdEye: false,
-            loginFailMsg: ''
+            loginFailMsg: '',
+            isChangePassword: false, // 是否為變更密碼modal
+            blockModal: false, 
+            blockModalMsg: ''
         }
     },
     methods: {
         login() {
             const vm = this;
-            if(vm.loginAccount === vm.bossAccount) {
-                vm.loginPermit = true;
-                vm.loginFailMsg = '';
-                vm.loginModal = false;
-            }else {
-                vm.loginFailMsg = '非老闆禁止進入哦';
+            if(!vm.isChangePassword) {
+                if(vm.loginAccount === vm.bossAccount) {
+                    vm.loginPermit = true;
+                    vm.closeModal();
+                }else {
+                    vm.loginFailMsg = '非老闆禁止進入哦';
+                }
             }
         },
         showPwd() {
@@ -173,6 +198,42 @@ export default {
             return (Object.prototype.toString.call(obj) === 'String' ||
             Object.prototype.toString.call(obj) === 'string' || 
             typeof(obj) === 'string') ? true : false;
+        },
+        openChangePwdModal() {
+            const vm = this;
+            vm.isChangePassword = true;
+            vm.loginModal = true;
+            vm.modalHeadMsg = '變更密碼';
+        },
+        changePassword() {
+            const vm = this;
+            if(vm.loginAccount === vm.bossAccount) {
+                vm.loginFailMsg = '密碼相同!';
+            }else {
+                bossRef.set(vm.loginAccount);
+                vm.closeModal();
+                vm.setBlockModal('變更成功');
+            }
+        },
+        setBlockModal(msg) {
+            const vm = this;
+            this.blockModal = true;
+            this.blockModalMsg = msg;
+            /**因為function() {}這裡的獨立作用域指向全局(也就是window)
+             * 而window裡沒有blockModal這個變數，所以必須先使用const vm = this;
+             * 然後在setTimeout裡使用vm.blockModal
+             */
+            setTimeout(function() {
+                this.blockModal = false;
+                // 若不用vm.blockModal，可以用.bind(this)告訴程式是針對這個Vue
+            }.bind(this), 3000);
+        },
+        closeModal() {
+            const vm = this;
+            vm.loginModal = false;
+            vm.loginAccount = '';
+            vm.loginFailMsg = '';
+            vm.isChangePassword = '';
         }
     },
     computed: {
@@ -314,5 +375,51 @@ export default {
     display: inline;
     height: auto;
     padding: 1px 1px;
+}
+.btn-outline {
+  color: inherit;
+  background-color: transparent;
+  transition: all .5s;
+}
+.btn-primary.btn-outline {
+  color: #428bca;
+}
+.btn-success.btn-outline {
+  color: #5cb85c;
+}
+.btn-info.btn-outline {
+  color: #5bc0de;
+}
+.btn-warning.btn-outline {
+  color: #f0ad4e;
+}
+.btn-danger.btn-outline {
+  color: #d9534f;
+}
+.btn-primary.btn-outline:hover,
+.btn-success.btn-outline:hover,
+.btn-info.btn-outline:hover,
+.btn-warning.btn-outline:hover,
+.btn-danger.btn-outline:hover {
+  color: white;
+  background-color: #d9534f;
+}
+
+/** black modal */
+.icard-list {
+    position: fixed;
+    top: 80px;
+    right: 0;
+    border-radius: 10px 0px 0px 10px;
+    padding: 11px 4px 0px 4px;
+    box-sizing: border-box;
+    background: rgba(18, 18, 18, 0.83);
+    width: 180px;
+    height: auto;
+}
+.closeWisdom {
+    color: #fff;
+    text-align: center;
+    margin: 4px 0px 4px 0px;
 }
 </style>

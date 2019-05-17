@@ -443,8 +443,6 @@ export default {
           vm.calculateAssistantHelps(firebaseKey);
           vm.loading = 'none';
           vm.setBlockModal('紀錄新增成功');
-        }else {
-          vm.callModal(1, '金額有誤');
         }
       }
     },
@@ -495,20 +493,26 @@ export default {
       const vm = this;
       const assistantHelps = vm.assistantHelps;
       var inputCurrect = true;
+      
       if(assistantHelps.length > 0) {
-        assistantHelps.forEach(item => {
-          if(item === 'cutAssistant' && vm.cut === '') {
-            inputCurrect = false;
-          }else if(item === 'dyeAssistant' && vm.dye === '') {
-            inputCurrect = false;
-          }else if(item === 'burnAssistant' && vm.burn === '') {
-            inputCurrect = false;
-          }else if(item === 'washAssistant' && vm.wash === '') {
-            inputCurrect = false;
-          }else {
-            inputCurrect = true;
-          }
-        });
+        // 檢查助理checkbox有打勾且有選擇助理
+        if(vm.workAssistantName !== 'none') {
+          assistantHelps.forEach(item => {
+            // 前面已經檢查過是否為數字，所以這裡只需判斷是否為空值
+            if((item === 'cutAssistant' && vm.cut === '') || 
+            (item === 'dyeAssistant' && vm.dye === '') ||
+            (item === 'burnAssistant' && vm.burn === '') ||
+            (item === 'washAssistant' && vm.wash === '')) {
+              inputCurrect = false;
+              vm.callModal(1, '金額有誤');
+            }else {
+              inputCurrect = true;
+            }
+          });
+        }else {
+          inputCurrect = false;
+          vm.callModal(1, '請選擇助理');
+        }        
       }
       return inputCurrect;
     },
@@ -575,7 +579,7 @@ export default {
       vm.messageModal = true;
       vm.infoMsg = msg;
       if(type === 1) { // 一般訊息
-        vm.commonCancel = true;
+        // vm.commonCancel = true;
         vm.commonCheck = true;
       }else if(type === 2) { // 刪除紀錄
         vm.commonCancel = true;

@@ -4,6 +4,7 @@ import CustomerInfo from '@/components/CustomerInfo'
 import CustomerInfoMobile from '@/components/CustomerInfoMobile'
 import AssistantSalary from '@/components/AssistantSalary'
 import index from '@/components/index'
+import CustomerAppointment from '@/components/CustomerAppointment'
 
 Vue.use(Router)
 
@@ -28,6 +29,11 @@ export default new Router({
       path: '/assistantSalary',
       name: 'AssistantSalary',
       component: AssistantSalary
+    },
+    {
+      path: '/customerAppointment',
+      name: 'CustomerAppointment',
+      component: CustomerAppointment
     }
   ]
 })
