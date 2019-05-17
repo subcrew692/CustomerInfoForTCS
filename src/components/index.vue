@@ -3,14 +3,14 @@
     <div class="row">
         <div class="col-md-4 col-md-offset-4">
             <div class="login-panel panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title" style="font-family:courier new;"><strong>TCS</strong></h3>
-                </div>
+                <!-- logo -->
+                <img src="../assets/TCS_logo.jpg" class="logoStyle" />
+
                 <div class="panel-body" style="text-align:center;">
                     <table width="100%">
                         <tr>
-                            <td style="width:50%"><router-link to="/customerInfo">顧客消費 <i class="fa fa-edit"></i></router-link></td>
-                            <td style="width:50%"><router-link to="/assistantSalary">員工薪資 <i class="fa fa-money"></i></router-link></td>
+                            <td style="width:50%"><router-link to="/customerInfo"><h3>顧客消費 <i class="fa fa-edit"></i></h3></router-link></td>
+                            <td style="width:50%"><router-link to="/assistantSalary"><h3>員工薪資 <i class="fa fa-money"></i></h3></router-link></td>
                         </tr>
                         <tr>
                             <!-- TODO
@@ -30,4 +30,9 @@
 </script>
 
 <style>
+.logoStyle {
+  width: 50%;
+  height: 50%;
+  padding: 15px;
+}
 </style>
